@@ -1,0 +1,403 @@
+---
+title: "Projekt_Mateusz_Kucharz"
+author: "Mateusz Kucharz"
+date: "2022-11-29"
+output: html_document
+---
+## Dane, na których będę pracował
+#### 1. Ilość dzieci na kobietę 
+#### 2. Przychód (Gdp per capita)
+#### 3. Współczynnik Ginniego pokazujacy stopień zróżnicowania społeczeństwa
+#### 4. Human development index 
+#### 5. Oczekiwana długość życia
+#### 6. Ilość śmierci dzieci (na 1000 urodzonych, w ciągu 1 roku życia) 
+#### 7. Średnia ilość lat spędzonych w szkole 25+ lat (Męszczyźni)
+#### 8. Średnia ilość lat spędzonych w szkole 25+ lat (Kobiety)
+
+## Kraje, których użyje podczas projektu:
+#### Norwegia, USA, Polska, Bułgaria, Indie, Tunezja, Senegal, Kamerun, Brazylia, Gwatemala
+#### Zostały one wybrane, ponieważ jest to mieszanka krajóW bardzo wysoko rozwiniętych, wysoko, śrendio oraz słabo
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(gapminder)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+attach(anscombe)
+
+dzieci_na_kobiete<-read.csv("C:/Users/mkuch/Rfile/dzieci_na_kobiete.csv")
+gdp<-read.csv("C:/Users/mkuch/Rfile/GDP.csv")
+gini<-read.csv("C:/Users/mkuch/Rfile/gini.csv")
+hdi<-read.csv("C:/Users/mkuch/Rfile/hdi.csv")
+dl_zycia<-read.csv("C:/Users/mkuch/Rfile/oczek_dl_zycia.csv")
+niemowle<-read.csv("C:/Users/mkuch/Rfile/noworodki.csv")
+srednia_ile_lat_szkola_ch<-read.csv("C:/Users/mkuch/Rfile/srednia_ile_lat_w_szkole_ch.csv")
+srednia_ile_lat_szkola_k<-read.csv("C:/Users/mkuch/Rfile/srednia_ile_lat_w_szkole_dz.csv")
+
+dzieci_na_kobiete1<-gather(dzieci_na_kobiete, year, dzieci, -country)
+gdp1<-gather(gdp, year, gdp, -country)
+gini1<-gather(gini, year, ginni, -country)
+hdi1<-gather(hdi, year, hdi, -country)
+dlzycia1<-gather(dl_zycia, year, dlzycia, -country)
+niemowle1<-gather(niemowle, year, zgonyDZ, -country)
+sredniach1<-gather(srednia_ile_lat_szkola_ch, year, szkolaCH, -country)
+sredniak1<-gather(srednia_ile_lat_szkola_k, year, szkolaK, -country)
+
+dz_na_kob2<-separate(dzieci_na_kobiete1, col = year, 
+                     into = c(NA,"year"), sep = "X")
+
+gdp2<-separate(gdp1, col = year, 
+               into = c(NA,"year"), sep = "X")
+
+gini2<-separate(gini1, col = year, 
+                into = c(NA,"year"), sep = "X")
+
+hdi2<-separate(hdi1, col = year, 
+               into = c(NA,"year"), sep = "X")
+
+dl_zycia2<-separate(dlzycia1, col = year, 
+                    into = c(NA,"year"), sep = "X")
+
+niemowle2<-separate(niemowle1, col = year, 
+                     into = c(NA,"year"), sep = "X")
+
+srednia2ch<-separate(sredniach1, col = year, 
+                     into = c(NA,"year"), sep = "X")
+
+srednia2k<-separate(sredniak1, col = year, 
+                    into = c(NA,"year"), sep = "X")
+
+
+dane <-inner_join(dz_na_kob2,gdp2, by=c("country", "year"))
+
+dane1 <-inner_join(dane,gini2, by=c("country", "year"))
+
+dane2 <-left_join(dane1,hdi2, by=c("country", "year"))
+
+dane3 <-inner_join(dane2,dl_zycia2, by=c("country", "year"))
+
+dane4 <-inner_join(dane3,niemowle2, by=c("country", "year"))
+
+dane5 <-inner_join(dane4,srednia2ch, by=c("country", "year"))
+
+dane6 <-inner_join(dane5,srednia2k, by=c("country", "year"))
+
+wybrane_kraje <-c("Norway", "United States", "Poland", "Bulgaria", "India", 
+                  "Tunisia", "Senegal", "Cameroon", "Brazil", "Guatemala")
+
+kraje <- dane6 %>%
+  group_by(country) %>%
+  mutate(year = as.numeric(year),dzieci = round(dzieci,0),ginni=round(ginni,0)/100)%>%
+  filter(country %in% wybrane_kraje)%>%
+  mutate(gdp = case_when(
+    grepl("k",gdp) ~ as.numeric(substring(gdp,1,nchar(gdp)-1))*1000,
+    TRUE ~ as.numeric(gdp)))
+
+
+projekt<-kraje%>%
+  filter(year %in% seq(1972,2022, by=5))
+
+
+
+#wykres1
+dane_wykres1<-dane4%>% filter(year %in% seq(2000,2015, by=5))%>%
+  group_by(country) %>%
+  mutate(year = as.numeric(year),dzieci = round(dzieci,0),ginni=round(ginni,0)/100)%>%
+  filter(country %in% wybrane_kraje)%>%
+  mutate(gdp = case_when(
+    grepl("k",gdp) ~ as.numeric(substring(gdp,1,nchar(gdp)-1))*1000,
+    TRUE ~ as.numeric(gdp)))
+
+  
+#wykres2
+dane_wykres2<-dane4%>% 
+  group_by(country) %>%
+  mutate(year = as.numeric(year),ginni=round(ginni,0)/100)%>%
+  filter(country %in% wybrane_kraje,year %in% seq(1962,2012, by=5))%>%
+  mutate(gdp = case_when(
+    grepl("k",gdp) ~ as.numeric(substring(gdp,1,nchar(gdp)-1))*1000,
+    TRUE ~ as.numeric(gdp)))%>%
+  select(country,ginni, gdp)
+
+dane_wykres2.1<-dane4%>% filter(year %in% seq(1962,2012, by=5))%>%
+  group_by(country) %>%
+  mutate(year = as.numeric(year))%>%
+  mutate(gdp = case_when(
+    grepl("k",gdp) ~ as.numeric(substring(gdp,1,nchar(gdp)-1))*1000,
+    TRUE ~ as.numeric(gdp)))%>%
+  select(country,ginni, gdp)
+
+
+
+x1<-dane_wykres2$ginni
+y1<-dane_wykres2$gdp
+
+srgi<-round(mean(x1),2)
+srgd<-round(mean(y1),2)
+
+srednia1 <- c(srgi,srgd)
+
+sdgi<-round(sd(x1),2)
+sdgd<-round(sd(y1),2)
+
+odchylenie1 <- c(sdgi,sdgd)
+
+cvgi<-round(sdgi/srgi * 100,2)
+cvgd<-round(sdgd/srgd * 100,2)
+
+zmiennosc1 <- c(cvgi, cvgd)
+
+wykres2 <- data.frame(srednia1, odchylenie1, zmiennosc1)
+rownames(wykres2)<-c("Gini","PKB")
+
+#wykres3
+
+dane_wykres3<-dane4%>% 
+  group_by(country) %>%
+  mutate(year = as.numeric(year))%>%
+  filter(country %in% wybrane_kraje,year %in% seq(1962,2012, by=5))%>%
+  select(country, year, gdp)%>%
+  mutate(gdp = case_when(
+    grepl("k",gdp) ~ as.numeric(substring(gdp,1,nchar(gdp)-1))*1000,
+    TRUE ~ as.numeric(gdp)))
+
+Bulgaria<- dane_wykres3 %>% 
+  filter(country == "Bulgaria")%>%select(country, gdp)
+Brazylia<- dane_wykres3 %>% 
+  filter(country == "Brazil")%>%select(country, gdp)
+Kamerun<- dane_wykres3 %>% 
+  filter(country == "Cameroon")%>%select(country, gdp)
+Guatemala<- dane_wykres3 %>% 
+  filter(country == "Guatemala")%>%select(country, gdp)
+Indie<- dane_wykres3 %>% 
+  filter(country == "India")%>%select(country, gdp)
+Norewgia<- dane_wykres3 %>% 
+  filter(country == "Norway")%>%select(country, gdp)
+Polska<- dane_wykres3 %>% 
+  filter(country == "Poland")%>%select(country, gdp)
+Senegal<- dane_wykres3 %>% 
+  filter(country == "Senegal")%>%select(country, gdp)
+Tunezja<- dane_wykres3 %>% 
+  filter(country == "Tunisia")%>%select(country, gdp)
+USA<- dane_wykres3 %>% 
+  filter(country == "United States")%>%select(country, gdp)
+
+srednia2<-c(mean(Bulgaria$gdp),mean(Brazylia$gdp),mean(Kamerun$gdp),mean(Guatemala$gdp),mean(Indie$gdp),mean(Norewgia$gdp),
+           mean(Polska$gdp),mean(Senegal$gdp),mean(Tunezja$gdp),mean(USA$gdp) )
+
+odchylenie2<-c(sd(Bulgaria$gdp),sd(Brazylia$gdp),sd(Kamerun$gdp),sd(Guatemala$gdp),sd(Indie$gdp),sd(Norewgia$gdp),
+           sd(Polska$gdp),sd(Senegal$gdp),sd(Tunezja$gdp),sd(USA$gdp) )
+
+cv1<-sd(Bulgaria$gdp)/mean(Bulgaria$gdp) * 100
+cv2<-sd(Brazylia$gdp)/mean(Brazylia$gdp) * 100
+cv3<-sd(Kamerun$gdp)/mean(Kamerun$gdp) * 100
+cv4<-sd(Guatemala$gdp)/mean(Guatemala$gdp) * 100
+cv5<-sd(Indie$gdp)/mean(Indie$gdp) * 100
+cv6<-sd(Norewgia$gdp)/mean(Norewgia$gdp) * 100
+cv7<-sd(Polska$gdp)/mean(Polska$gdp) * 100
+cv8<-sd(Senegal$gdp)/mean(Senegal$gdp) * 100
+cv9<-sd(Tunezja$gdp)/mean(Tunezja$gdp) * 100
+cv10<-sd(USA$gdp)/mean(USA$gdp) * 100
+zmiennosc2<-c(cv1,cv2,cv3,cv4,cv5,cv6,cv7,cv8,cv9,cv10)
+
+
+
+#wykres4
+dane_wykres4<-dane4%>% filter(year %in% c(2000,1990, 1980,2010))%>%
+  group_by(country) %>%
+  mutate(year = as.numeric(year),dzieci = round(dzieci,0) )%>%
+  filter(country %in% wybrane_kraje)%>%
+  mutate(gdp = case_when(
+    grepl("k",gdp) ~ as.numeric(substring(gdp,1,nchar(gdp)-1))*1000,
+    TRUE ~ as.numeric(gdp)))%>%
+  select(country,year,dlzycia)
+
+#wykres5
+
+dane_wykres5<-dane4%>% 
+  group_by(country) %>%
+  mutate(year = as.numeric(year),hdi=round(hdi,2) )%>%
+  filter(country %in% wybrane_kraje,year %in% seq(1994,2015, by=3))%>%
+  mutate(gdp = case_when(
+    grepl("k",gdp) ~ as.numeric(substring(gdp,1,nchar(gdp)-1))*1000,
+    TRUE ~ as.numeric(gdp)))%>%
+  select(country,year,zgonyDZ, hdi)
+
+#wykres6
+dane_wykres6<-dane4%>% filter(year %in% c(1982,1997, 2012))%>%
+  group_by(country) %>%
+  mutate(year = as.numeric(year),dzieci = round(dzieci,0) )%>%
+  filter(country %in% wybrane_kraje)%>%
+  mutate(gdp = case_when(
+    grepl("k",gdp) ~ as.numeric(substring(gdp,1,nchar(gdp)-1))*1000,
+    TRUE ~ as.numeric(gdp)))%>%
+  select(country,year,dzieci)
+
+#wykres7
+
+dane_wykres7<- kraje%>%
+  select(country, year, szkolaCH, szkolaK)%>%
+  filter(year %in% seq(1974,2009, by=5))
+
+
+```
+
+# Pytanie 1: Czy wysoki wskaźnik HDI jest równoznaczny z wysokim PKB kraju?
+```{r}
+
+dane_wykres1 %>%
+  ggplot() +
+  geom_point(mapping = aes(x = dane_wykres1$hdi, y = dane_wykres1$gdp, color = as.factor(dane_wykres1$country)), size = 4) +
+  ggtitle("Czy wysoki wskaźnik HDI jest równoznaczny wysokiemu PKB kraju") +
+  labs(y = "PKB",
+       x = "Human Development Index",
+       color = "Kraje") + facet_grid(year~.)+
+  ylim(0,65000)+theme_bw()
+
+
+```
+```{r}
+cor(dane_wykres1$gdp,dane_wykres1$hdi, method = "spearman")
+cor(dane_wykres1$gdp,dane_wykres1$hdi, method = "pearson")
+```
+Po wykresie można zauważyć fakt, iż z biegiem czasu rozwój społeczny omawianych państw stale rósł
+w pewnych przypadkach nawet bardzo w przeciągu 15 lat, biorąc pod uwagę wykresy oraz współczynnik korelacji Pearsona
+który w tym przypadku wynosi ~0,99 można śmiało stwierdzić, że dużemu wzrostu hdi towarzyszy również duży wzrost PKB kraju
+
+# Pytanie 2: Czy wysokie PKB państwa jest równoznaczne z jego niskim zróżnicowaniem społecznym?
+
+```{r}
+wykres2
+```
+
+
+```{r}
+summary(dane_wykres2)
+```
+
+
+```{r}
+round(cor(x1,y1,method = "spearman"),3)
+round(cor(x1,y1,method = "pearson"),3)
+
+```
+
+
+```{r}
+#Dla wszystkich państw z gapmindera
+round(cor(dane_wykres2.1$ginni,dane_wykres2.1$gdp,method = "pearson"),3)
+round(cor(dane_wykres2.1$ginni,dane_wykres2.1$gdp,method = "spearman"),3)
+```
+
+Ponieważ wysoki wskaźnik ginniego świadczy o dużym zróżnicowaniu społecznym w kraju, niska korelacja pearsona i spearmana
+mówi nam, że pomiędzy wskaźnikiem ginniego a pkb zachodzi bardzo słaba zależność tzn. jeśli pogłebia się zróżnicowanie
+w kraju to pkb nie wzrasta, w przypadku gdybyśmy wzieli pod uwage większą ilość państw zależności powinny wyjść ujemne
+świadczy to o tym, że wraz ze spadkiem zależnosci PKB powinno wzrastać.
+
+# Pytanie 3: Sprawdzenie zmiany wielkości PKB w wybranych krajach na przestrzeni lat
+```{r}
+dane_wykres3 %>%
+  ggplot(aes(x = year, y = gdp, col = country)) +
+  geom_line(size = 1) + xlim(1962,2012)+
+  ylim(0,65000)+theme_bw() 
+
+```
+```{r}
+wyniki2 <- data.frame(srednia2, odchylenie2, zmiennosc2)
+rownames(wyniki2)<-c("Bulgaria", "Brazylia", "Kamerun", "Gwatemala", "Indie", "Norwegia", "Polska", "Senegal", "Tunezja", "USA")
+wyniki2
+```
+Po wykresie można w prosty sposób stwierdzić, które kraje należą do jakiej grupy krajów rozwijających się.
+Jasno widać stale i prężnie rozwijające się państwa USA i Norwegię, podczas gdy reszta państw znajduję się
+w miarę blisko siebie.PKB Polski, Bułgarii Brazyli w latach 1990+ utrzymuje trend wzrostowy, podczas gdy kraje 
+znajdujące się na wykresie pod nimi nie mogą się takim pochwalić. Warto zwrócić uwagę na obliczone statystyki opisowe,
+ponieważ można zauważyć, że w większości państw zmienność występuje na przeciętnym poziomie, lecz pojawiają się dosyć duże
+  odchylenia standardowe, dla krajów bardzo rozwiniętych, a wynika to z ich dużych przyrostów w przeciągu tych 50 lat.
+
+# Pytanie 4: Jak zmienia się oczekiwana długosc zycia w wybranych państwach?
+
+```{r}
+dane_wykres4$kraj <- dane_wykres4$country %>%
+  substr(start = 1, stop = 2) %>%
+  toupper()
+
+dane_wykres4 %>%
+  ggplot(aes(y = reorder(kraj, dlzycia), 
+             x = dlzycia),
+         fill = continent) +
+  geom_point(size = 3, col = "black") + 
+  labs(y = "Kraje",x = "Oczekiwana dlugosc zycia")+
+  ggtitle("Jak zmienia się oczekiwana długość życia w wybranych państwach?")+
+  facet_grid(.~year)+theme_bw()
+```
+
+Oczekiwana długość życia przeważnie rośła co 10 lat w każdym państwie. Oczywiście największę różnice, pomiędzy
+latami posiadają kraje średnio i słabo rozwinięte, Gwatemala wychodzi tu na prowadzenie. Polska, USA, Norwegia już
+w 1980 wykazywały wysoką oczekiwaną długość życia, a ponieważ są to spore wartośći i mówimy tutaj o wieku, co raz 
+ciężej jest zwiększyć tę wartość.
+
+
+# Pytanie 5: Sprawdzenie zależności między HDI, a smiercią dzieci w ciągu 1 roku życia(na 1000 urodzeń)
+
+```{r}
+dane_wykres5 %>%
+  ggplot() +
+  geom_point(mapping = aes(x = hdi, y = zgonyDZ, color = as.factor(country)), size = 2) +
+  ggtitle("Ilość śmierci dzieci i jej zależnosc od HDI (1994-2015, co 3 lata)") +
+  labs(y = "Zgony dzieci w ciągu 1 roku życia(na 1000ur)",
+       x = "Human Development Index",
+       color = "Kraje")+theme_bw()
+```
+
+Brak odpowiedniej ilości środków higieny, doktorów czy klimat w tym przypadku ma duże znaczenie.
+Poniżej HDI o wartości 0.5 mamy przeważnie kraje afrykańskie gdzie ilość śmierci dzieci zaczyna gwałtownie rosnąć. 
+Jest zauważalna duża poprawa jakości życia i zmniejszenie liczby śmierci w Tunezji oraz Brazyli przez te parę
+lat. U reszty pomimo wzrostóW w HDI zgony pozostają na podobnym poziomie czyli prawopodobnie, są one wywołane przez komplikację
+przy ciąży, czy wypadki, a nie warunki życia.
+
+# Pytanie 6: Czy to prawda, że wraz z latami dzietność rodzin się zmniejsza na rzecz karier zawodowych rodziców?
+
+```{r}
+dane_wykres6$kraj <- dane_wykres6$country %>%
+  substr(start = 1, stop = 2) %>%
+  toupper()
+
+dane_wykres6 %>%
+  ggplot() +
+  geom_col(mapping = aes(x = reorder(kraj, -dzieci), y = dzieci), fill="light green")+
+  ggtitle("Czy to prawda, że z biegiem lat kobiety rodzą mniej dzieci?")+
+  labs(y = "Ilosc dzieci na kobiete",
+       x = "Kraje")+
+  facet_grid(.~year)+theme_bw()
+```
+
+Jak można zauważyc kobiety rodzą dzieci z tendęcją spadkową, ewentualnie liczba utrzymuje się na niskich wartościach.
+Myślę, że może to wynikać z faktu, że kobiety stają sie co raz bardziej samodzielne i pragną własnych karier
+zawodowych, niż tylko zajmować sie domem jak to miało kiedyś miejsce. Powrzechnie mówi się o kryzysie demograficznym
+nie tylko w polsce ale rowniez na świecie, oczywiście jest trochę wyjatków takie jak np. niektóre mniejsze kraje 
+afrykańskie, w których jedna kobieta ma bardzo duże ilości dzieci, jednak z powodu braku odpowiedniej higieny i 
+braku lekarzy jakaś część niestety umiera.
+
+# Pytanie 7: Czy ludziom co raz bardziej zależy na edukacji?
+```{r}
+wykres7 <-ggplot(data = dane_wykres7, aes(x=szkolaK, y=szkolaCH, color=country, label=year)) +
+  geom_point() +
+  xlab("Ilość lat w szkole kobiet(osoby 25lat +)") +
+  ylab("Ilość lat w szkole męszczyzn(osoby 25lat +)") +
+  ggtitle("Czy ludziom co raz bardziej zależy na edukacji?") +
+  geom_abline(slope = 1, intercept = 0, color = "grey")+
+  scale_x_continuous(breaks=seq(1,15,by=2))+
+  scale_y_continuous(breaks=seq(1,15,by=2))+
+  theme_light()
+
+wykres7 + geom_text(size=3.5) 
+```
+
+Można zauważyć tendencję wzrostową w każdym omawianym państwie, po prawej stronie wykresu czyli w krajach takich jak
+Polska, USA, Bulgaria czy Norwegia przyrosty po stronie kobiet i meszczyn sa bardzo podobne do siebie, w przeciwieństwie do 
+krajów słabiej rozwiniętych gdzie jasno widać, że męszczyźni są tymi, którzy kładą większy nacisk na edukację.
+Ogólnie rzecz mówiąc, z roku na rok co raz wiecej osob przykłada wiekszą uwagę do odpowiedniej edukacji, w tym warto zaznaczyć
+tutaj wzrosty po stronie kobiet, które mogą się bezposrednio wiązać z omawiawnym wcześniej problemem mniejszej dzietności.
+
+
+
