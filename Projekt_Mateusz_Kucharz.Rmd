@@ -1,22 +1,23 @@
 ---
-title: "Projekt_Mateusz_Kucharz"
+title: "Project_Mateusz_Kucharz"
 author: "Mateusz Kucharz"
 date: "2022-11-29"
 output: html_document
 ---
-## Dane, na których będę pracował
-#### 1. Ilość dzieci na kobietę 
-#### 2. Przychód (Gdp per capita)
-#### 3. Współczynnik Ginniego pokazujacy stopień zróżnicowania społeczeństwa
-#### 4. Human development index 
-#### 5. Oczekiwana długość życia
-#### 6. Ilość śmierci dzieci (na 1000 urodzonych, w ciągu 1 roku życia) 
-#### 7. Średnia ilość lat spędzonych w szkole 25+ lat (Męszczyźni)
-#### 8. Średnia ilość lat spędzonych w szkole 25+ lat (Kobiety)
 
-## Kraje, których użyje podczas projektu:
-#### Norwegia, USA, Polska, Bułgaria, Indie, Tunezja, Senegal, Kamerun, Brazylia, Gwatemala
-#### Zostały one wybrane, ponieważ jest to mieszanka krajóW bardzo wysoko rozwiniętych, wysoko, śrendio oraz słabo
+## Data I will be working on
+#### 1. Number of children per woman
+#### 2. Income (GDP per capita)
+#### 3. Gini coefficient 
+#### 4. Human development index
+#### 5. Expected lifespan
+#### 6. Number of child deaths (per 1000 live births, within the first year of life) 
+#### 7. Average number of years spent in school for individuals 25+ years (Men)
+#### 8. Average number of years spent in school for individuals 25+ years (Women)
+
+## Countries I will use during the project:
+#### Norway, USA, Poland, Bulgaria, India, Tunisia, Senegal, Cameroon, Brazil, Guatemala
+#### These have been chosen because they represent a mix of countries that are very highly developed, highly, moderately, and poorly developed
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(gapminder)
@@ -242,13 +243,13 @@ dane_wykres7<- kraje%>%
 
 ```
 
-# Pytanie 1: Czy wysoki wskaźnik HDI jest równoznaczny z wysokim PKB kraju?
+# Question 1: Is a high Human Development Index synonymous with a country's high GDP?
 ```{r}
 
 dane_wykres1 %>%
   ggplot() +
   geom_point(mapping = aes(x = dane_wykres1$hdi, y = dane_wykres1$gdp, color = as.factor(dane_wykres1$country)), size = 4) +
-  ggtitle("Czy wysoki wskaźnik HDI jest równoznaczny wysokiemu PKB kraju") +
+  ggtitle("Is a high Human Development Index synonymous with a country's high GDP?") +
   labs(y = "PKB",
        x = "Human Development Index",
        color = "Kraje") + facet_grid(year~.)+
@@ -260,11 +261,11 @@ dane_wykres1 %>%
 cor(dane_wykres1$gdp,dane_wykres1$hdi, method = "spearman")
 cor(dane_wykres1$gdp,dane_wykres1$hdi, method = "pearson")
 ```
-Po wykresie można zauważyć fakt, iż z biegiem czasu rozwój społeczny omawianych państw stale rósł
-w pewnych przypadkach nawet bardzo w przeciągu 15 lat, biorąc pod uwagę wykresy oraz współczynnik korelacji Pearsona
-który w tym przypadku wynosi ~0,99 można śmiało stwierdzić, że dużemu wzrostu hdi towarzyszy również duży wzrost PKB kraju
+From the chart, we can notice that over time the social development of the discussed countries steadily increased.
+In some cases, even significantly over 15 years, taking into account the charts and the Pearson correlation coefficient
+which in this case is ~0.99, it can be confidently stated that a large increase in HDI is also accompanied by a large increase in a country's GDP.
 
-# Pytanie 2: Czy wysokie PKB państwa jest równoznaczne z jego niskim zróżnicowaniem społecznym?
+# Question 2: Does a country's high GDP equate to its low social differentiation?
 
 ```{r}
 wykres2
@@ -289,12 +290,10 @@ round(cor(dane_wykres2.1$ginni,dane_wykres2.1$gdp,method = "pearson"),3)
 round(cor(dane_wykres2.1$ginni,dane_wykres2.1$gdp,method = "spearman"),3)
 ```
 
-Ponieważ wysoki wskaźnik ginniego świadczy o dużym zróżnicowaniu społecznym w kraju, niska korelacja pearsona i spearmana
-mówi nam, że pomiędzy wskaźnikiem ginniego a pkb zachodzi bardzo słaba zależność tzn. jeśli pogłebia się zróżnicowanie
-w kraju to pkb nie wzrasta, w przypadku gdybyśmy wzieli pod uwage większą ilość państw zależności powinny wyjść ujemne
-świadczy to o tym, że wraz ze spadkiem zależnosci PKB powinno wzrastać.
+Because a high Gini index indicates a large social differentiation in a country, the low Pearson and Spearman correlation tells us that there is a very weak dependence between the Gini index and GDP. That is, if social differentiation deepens in a country, the GDP does not increase, in the case that we considered a larger number of countries, the dependencies should come out negative
+this indicates that as the dependence decreases GDP should increase.
 
-# Pytanie 3: Sprawdzenie zmiany wielkości PKB w wybranych krajach na przestrzeni lat
+# Question 3: Checking the change in GDP size in selected countries over the years
 ```{r}
 dane_wykres3 %>%
   ggplot(aes(x = year, y = gdp, col = country)) +
@@ -307,14 +306,14 @@ wyniki2 <- data.frame(srednia2, odchylenie2, zmiennosc2)
 rownames(wyniki2)<-c("Bulgaria", "Brazylia", "Kamerun", "Gwatemala", "Indie", "Norwegia", "Polska", "Senegal", "Tunezja", "USA")
 wyniki2
 ```
-Po wykresie można w prosty sposób stwierdzić, które kraje należą do jakiej grupy krajów rozwijających się.
-Jasno widać stale i prężnie rozwijające się państwa USA i Norwegię, podczas gdy reszta państw znajduję się
-w miarę blisko siebie.PKB Polski, Bułgarii Brazyli w latach 1990+ utrzymuje trend wzrostowy, podczas gdy kraje 
-znajdujące się na wykresie pod nimi nie mogą się takim pochwalić. Warto zwrócić uwagę na obliczone statystyki opisowe,
-ponieważ można zauważyć, że w większości państw zmienność występuje na przeciętnym poziomie, lecz pojawiają się dosyć duże
-  odchylenia standardowe, dla krajów bardzo rozwiniętych, a wynika to z ich dużych przyrostów w przeciągu tych 50 lat.
+From the chart, one can easily determine which countries belong to which group of developing countries.
+It is clear to see steadily and vigorously developing states like the USA and Norway, while the rest of the countries
+are relatively close to each other. The GDP of Poland, Bulgaria, and Brazil in the 1990+ maintains an upward trend, while the countries
+below them on the chart cannot boast the same. It is worth paying attention to the calculated descriptive statistics,
+as you can notice that in most countries, the variability occurs at an average level, but there are quite large
+standard deviations for very developed countries, and this results from their large increases over these 50 years.
 
-# Pytanie 4: Jak zmienia się oczekiwana długosc zycia w wybranych państwach?
+# Question 4: How does the expected lifespan change in selected countries?
 
 ```{r}
 dane_wykres4$kraj <- dane_wykres4$country %>%
@@ -326,36 +325,32 @@ dane_wykres4 %>%
              x = dlzycia),
          fill = continent) +
   geom_point(size = 3, col = "black") + 
-  labs(y = "Kraje",x = "Oczekiwana dlugosc zycia")+
-  ggtitle("Jak zmienia się oczekiwana długość życia w wybranych państwach?")+
+  labs(y = "Kraje",x = "Life expectancy")+
+  ggtitle("How does the expected lifespan change in selected countries?")+
   facet_grid(.~year)+theme_bw()
 ```
 
-Oczekiwana długość życia przeważnie rośła co 10 lat w każdym państwie. Oczywiście największę różnice, pomiędzy
-latami posiadają kraje średnio i słabo rozwinięte, Gwatemala wychodzi tu na prowadzenie. Polska, USA, Norwegia już
-w 1980 wykazywały wysoką oczekiwaną długość życia, a ponieważ są to spore wartośći i mówimy tutaj o wieku, co raz 
-ciężej jest zwiększyć tę wartość.
+The expected lifespan usually grew every 10 years in each country. Of course, the biggest differences between years are owned by countries that are moderately and poorly developed, with Guatemala taking the lead here. Poland, the USA, and Norway already in 1980 showed a high expected lifespan, and since these are large values and we are talking about age, it is increasingly difficult to increase this value.
 
 
-# Pytanie 5: Sprawdzenie zależności między HDI, a smiercią dzieci w ciągu 1 roku życia(na 1000 urodzeń)
+# Question 5: Checking the relationship between HDI and child mortality within the first year of life (per 1000 births)
 
 ```{r}
 dane_wykres5 %>%
   ggplot() +
   geom_point(mapping = aes(x = hdi, y = zgonyDZ, color = as.factor(country)), size = 2) +
-  ggtitle("Ilość śmierci dzieci i jej zależnosc od HDI (1994-2015, co 3 lata)") +
-  labs(y = "Zgony dzieci w ciągu 1 roku życia(na 1000ur)",
+  ggtitle("Number of child deaths and its dependency on HDI (1994-2015, every 3 years)") +
+  labs(y = "Child deaths within the first year of life (per 1000 births)",
        x = "Human Development Index",
        color = "Kraje")+theme_bw()
 ```
 
-Brak odpowiedniej ilości środków higieny, doktorów czy klimat w tym przypadku ma duże znaczenie.
-Poniżej HDI o wartości 0.5 mamy przeważnie kraje afrykańskie gdzie ilość śmierci dzieci zaczyna gwałtownie rosnąć. 
-Jest zauważalna duża poprawa jakości życia i zmniejszenie liczby śmierci w Tunezji oraz Brazyli przez te parę
-lat. U reszty pomimo wzrostóW w HDI zgony pozostają na podobnym poziomie czyli prawopodobnie, są one wywołane przez komplikację
-przy ciąży, czy wypadki, a nie warunki życia.
+The lack of proper hygiene, doctors, or climate in this case makes a big difference.
+Below an HDI of 0.5, we mostly have African countries where the number of child deaths starts to rise sharply.
+There is a noticeable significant improvement in the quality of life and a reduction in the number of deaths in Tunisia and Brazil over these few
+years. In the rest, despite increases in HDI, deaths remain at a similar level, meaning they are probably caused by pregnancy complications or accidents, not living conditions.
 
-# Pytanie 6: Czy to prawda, że wraz z latami dzietność rodzin się zmniejsza na rzecz karier zawodowych rodziców?
+# Question 6: Is it true that over the years the birth rate decreases as parents prioritize their careers?
 
 ```{r}
 dane_wykres6$kraj <- dane_wykres6$country %>%
@@ -365,26 +360,21 @@ dane_wykres6$kraj <- dane_wykres6$country %>%
 dane_wykres6 %>%
   ggplot() +
   geom_col(mapping = aes(x = reorder(kraj, -dzieci), y = dzieci), fill="light green")+
-  ggtitle("Czy to prawda, że z biegiem lat kobiety rodzą mniej dzieci?")+
-  labs(y = "Ilosc dzieci na kobiete",
+  ggtitle("Is it true that over the years the birth rate decreases as parents prioritize their careers?")+
+  labs(y = "Children per woman",
        x = "Kraje")+
   facet_grid(.~year)+theme_bw()
 ```
 
-Jak można zauważyc kobiety rodzą dzieci z tendęcją spadkową, ewentualnie liczba utrzymuje się na niskich wartościach.
-Myślę, że może to wynikać z faktu, że kobiety stają sie co raz bardziej samodzielne i pragną własnych karier
-zawodowych, niż tylko zajmować sie domem jak to miało kiedyś miejsce. Powrzechnie mówi się o kryzysie demograficznym
-nie tylko w polsce ale rowniez na świecie, oczywiście jest trochę wyjatków takie jak np. niektóre mniejsze kraje 
-afrykańskie, w których jedna kobieta ma bardzo duże ilości dzieci, jednak z powodu braku odpowiedniej higieny i 
-braku lekarzy jakaś część niestety umiera.
+As can be observed, the number of children born to women shows a downward trend or the numbers remain low. This may be due to the fact that women are becoming increasingly independent and aspire to have their own professional careers rather than just taking care of the home as was the case in the past. There is a commonly discussed demographic crisis not only in Poland but also worldwide. Of course, there are some exceptions such as some smaller African countries where a woman has a very large number of children, but due to a lack of proper hygiene and medical care, some unfortunately die.
 
-# Pytanie 7: Czy ludziom co raz bardziej zależy na edukacji?
+# Question 7: Do people increasingly value education?
 ```{r}
 wykres7 <-ggplot(data = dane_wykres7, aes(x=szkolaK, y=szkolaCH, color=country, label=year)) +
   geom_point() +
-  xlab("Ilość lat w szkole kobiet(osoby 25lat +)") +
-  ylab("Ilość lat w szkole męszczyzn(osoby 25lat +)") +
-  ggtitle("Czy ludziom co raz bardziej zależy na edukacji?") +
+  xlab("Years in school women(25yo +)") +
+  ylab("Years in school men(25 yo +)") +
+  ggtitle("Do people increasingly value education?") +
   geom_abline(slope = 1, intercept = 0, color = "grey")+
   scale_x_continuous(breaks=seq(1,15,by=2))+
   scale_y_continuous(breaks=seq(1,15,by=2))+
@@ -393,11 +383,6 @@ wykres7 <-ggplot(data = dane_wykres7, aes(x=szkolaK, y=szkolaCH, color=country, 
 wykres7 + geom_text(size=3.5) 
 ```
 
-Można zauważyć tendencję wzrostową w każdym omawianym państwie, po prawej stronie wykresu czyli w krajach takich jak
-Polska, USA, Bulgaria czy Norwegia przyrosty po stronie kobiet i meszczyn sa bardzo podobne do siebie, w przeciwieństwie do 
-krajów słabiej rozwiniętych gdzie jasno widać, że męszczyźni są tymi, którzy kładą większy nacisk na edukację.
-Ogólnie rzecz mówiąc, z roku na rok co raz wiecej osob przykłada wiekszą uwagę do odpowiedniej edukacji, w tym warto zaznaczyć
-tutaj wzrosty po stronie kobiet, które mogą się bezposrednio wiązać z omawiawnym wcześniej problemem mniejszej dzietności.
-
+A growing trend in education is observed in every country discussed, with the right side of the chart, in countries such as Poland, the USA, Bulgaria, and Norway, showing similar increases in education years between women and men. In contrast, in less developed countries, it's clear that men place more emphasis on education. Generally speaking, year after year, more people are placing greater importance on proper education. It's worth noting the increases on the women's side, which may directly relate to the previously discussed issue of lower birth rates.
 
 
